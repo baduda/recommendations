@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-@Repository
 /**
  * JPA repository for price time series.
  *
@@ -19,6 +18,7 @@ import org.springframework.stereotype.Repository;
  * two timestamps The DESC order on the timestamp aligns with queries requesting newest-first while
  * still serving ASC scans via index-only traversal in PostgreSQL.
  */
+@Repository
 public interface PriceRepository extends JpaRepository<PriceEntity, Long> {
 
     /**

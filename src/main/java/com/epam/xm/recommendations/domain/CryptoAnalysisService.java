@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
-@Service
 /**
  * Performs core domain analytics on crypto price time series.
  *
@@ -16,6 +15,7 @@ import org.springframework.stereotype.Service;
  * range), potentially changing ordering and downstream decisions. By fixing scale and using {@link
  * java.math.RoundingMode#HALF_UP} the results are stable and auditable.
  */
+@Service
 public class CryptoAnalysisService {
 
     /**

@@ -18,8 +18,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service
-@Transactional(readOnly = true)
 /**
  * Application service orchestrating persistence access, domain analytics, and caching.
  *
@@ -27,6 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
  * avoid accidental writes. Cache annotations reduce database pressure for frequently requested
  * symbols and precomputed ranges.
  */
+@Service
+@Transactional(readOnly = true)
 public class CryptoApplicationService {
 
     private final PriceRepository priceRepository;

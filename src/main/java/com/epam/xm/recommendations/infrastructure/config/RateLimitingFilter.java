@@ -20,7 +20,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
-@Component
 /**
  * Servlet filter enforcing per-IP rate limiting via Bucket4j.
  *
@@ -28,6 +27,7 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
  * delegates to {@link org.springframework.web.servlet.HandlerExceptionResolver} to produce a
  * consistent RFC 7807 response.
  */
+@Component
 public class RateLimitingFilter extends OncePerRequestFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RateLimitingFilter.class);
@@ -53,7 +53,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
             HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        /**
+        /*
          * Consumes one token per request. If the bucket is empty, a 429 error is returned.
          *
          * @param request incoming HTTP request

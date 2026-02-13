@@ -14,12 +14,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestControllerAdvice
 /**
  * Centralized translation of exceptions into RFC 7807-style API errors.
  *
  * <p>Keeps controller code lean and ensures consistent error shape across endpoints.
  */
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);

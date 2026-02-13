@@ -9,13 +9,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-@Configuration
-@EnableScheduling
-@EnableSchedulerLock(defaultLockAtMostFor = "10m")
 /**
  * Scheduling configuration enabling ShedLock to avoid concurrent ETL runs across multiple
  * application instances.
  */
+@Configuration
+@EnableScheduling
+@EnableSchedulerLock(defaultLockAtMostFor = "10m")
 public class SchedulerConfig {
 
     /**

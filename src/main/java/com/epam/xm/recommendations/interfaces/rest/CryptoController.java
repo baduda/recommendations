@@ -19,16 +19,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
-@RequestMapping("/api/v1/crypto")
-@Tag(name = "Crypto Stats API", description = "Endpoints for cryptocurrency analytics")
-@Validated
 /**
  * REST controller exposing read-only analytics endpoints.
  *
  * <p>The controller delegates to the application service and returns DTOs. It validates input
  * format (e.g., ticker pattern, ISO date) at the edge to fail fast and produce RFC 7807 errors.
  */
+@RestController
+@RequestMapping("/api/v1/crypto")
+@Tag(name = "Crypto Stats API", description = "Endpoints for cryptocurrency analytics")
+@Validated
 public class CryptoController {
 
     private final CryptoApplicationService cryptoService;
@@ -65,7 +65,7 @@ public class CryptoController {
                             regexp = "^[A-Z]{3,10}$",
                             message = "Symbol must be 3-10 uppercase letters")
                     String symbol) {
-        /**
+        /*
          * Retrieves summary stats for the given symbol.
          *
          * @param symbol coin ticker, validated by regex
@@ -94,7 +94,7 @@ public class CryptoController {
             })
     @GetMapping("/sorted")
     public List<CryptoRangeDto> getSortedRange() {
-        /**
+        /*
          * Lists all coins sorted by descending normalized range.
          *
          * @return array of {@link CryptoRangeDto}
@@ -127,7 +127,7 @@ public class CryptoController {
                     @RequestParam
                     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
                     LocalDate date) {
-        /**
+        /*
          * Returns the coin with the highest normalized range for a specific date.
          *
          * @param date target date in UTC
