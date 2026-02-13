@@ -19,6 +19,7 @@ repositories {
 }
 
 dependencies {
+    implementation("org.jspecify:jspecify:1.0.0")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-validation")
@@ -30,6 +31,11 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter:1.20.5")
     testImplementation("org.testcontainers:postgresql:1.20.5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    options.compilerArgs.add("-Xlint:all")
+    options.compilerArgs.add("-Werror")
 }
 
 tasks.withType<Test> {
