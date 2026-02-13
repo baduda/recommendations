@@ -42,7 +42,6 @@ dependencies {
     implementation("com.github.ben-manes.caffeine:caffeine")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
     runtimeOnly("org.postgresql:postgresql")
-    testImplementation("com.h2database:h2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:junit-jupiter:1.20.5")

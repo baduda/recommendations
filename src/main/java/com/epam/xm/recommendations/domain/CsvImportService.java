@@ -27,18 +27,18 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Service
-/**
- * ETL service importing CSV price data into the database.
- *
- * <p>The import is executed on Java Virtual Threads (Project Loom) via {@code
- * Executors.newVirtualThreadPerTaskExecutor()}. Virtual threads are chosen instead of a fixed
- * platform-thread pool because file I/O and JDBC operations are predominantly blocking. Virtual
- * threads allow us to scale the number of concurrent file processing tasks without tying up OS
- * threads, improving throughput with minimal complexity and excellent observability. Batching is
- * used to reduce JDBC round-trips.
- */
 @SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.TooManyMethods", "PMD.CyclomaticComplexity"})
 public class CsvImportService {
+    /**
+     * ETL service importing CSV price data into the database.
+     *
+     * <p>The import is executed on Java Virtual Threads (Project Loom) via {@code
+     * Executors.newVirtualThreadPerTaskExecutor()}. Virtual threads are chosen instead of a fixed
+     * platform-thread pool because file I/O and JDBC operations are predominantly blocking. Virtual
+     * threads allow us to scale the number of concurrent file processing tasks without tying up OS
+     * threads, improving throughput with minimal complexity and excellent observability. Batching
+     * is used to reduce JDBC round-trips.
+     */
     private static final Logger LOGGER = LoggerFactory.getLogger(CsvImportService.class);
 
     private final JdbcTemplate jdbcTemplate;
@@ -64,7 +64,19 @@ public class CsvImportService {
         checkPathExists(rootPath);
         checkIsDirectory(rootPath);
         checkIsReadable(rootPath);
+        checkHasCsvFiles(rootPath);
         LOGGER.info("Import directory validated: {}", rootPath);
+    }
+
+    private void checkHasCsvFiles(Path path) {
+        try (Stream<Path> files = Files.list(path)) {
+            boolean hasCsv = files.anyMatch(p -> p.toString().endsWith(".csv"));
+            if (!hasCsv) {
+                throw new IllegalStateException("No CSV files found in import directory: " + path);
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to check files in directory: " + path, e);
+        }
     }
 
     private void checkPathExists(Path path) {
@@ -139,12 +151,16 @@ public class CsvImportService {
     @SuppressWarnings("PMD.AvoidCatchingGenericException")
     private void processFile(Path path) {
         LOGGER.info("Processing file: {}", path.getFileName());
+        long startTime = System.currentTimeMillis();
 
         try (var is = Files.newInputStream(path);
                 MappingIterator<Map<?, ?>> it =
                         csvMapper.readerFor(Map.class).with(csvSchema).readValues(is)) {
 
             processRows(it, path);
+
+            long duration = System.currentTimeMillis() - startTime;
+            LOGGER.info("File {} imported in {} ms", path.getFileName(), duration);
 
         } catch (IOException e) {
             LOGGER.error("Failed to process file: {}", path, e);

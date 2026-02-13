@@ -63,7 +63,9 @@ class CsvImportServiceTest {
     }
 
     @Test
-    void shouldValidateDirectorySuccessfully() {
+    void shouldValidateDirectorySuccessfully() throws IOException {
+        Path csvFile = tempDir.resolve("BTC_values.csv");
+        Files.createFile(csvFile);
         AppImportProperties props = new AppImportProperties(tempDir.toString());
         csvImportService = new CsvImportService(jdbcTemplate, props, 100);
         csvImportService.validateDirectory();
@@ -88,11 +90,11 @@ class CsvImportServiceTest {
     }
 
     @Test
-    void shouldThrowWhenDirectoryNotReadable() {
-        // Hard to test on some OS, but let's try a path that might be restricted or just mock it if
-        // possible.
-        // On macOS/Linux, we can't easily create a non-readable dir in temp without more effort.
-        // Let's skip it or just assume the others cover enough instructions.
+    void shouldThrowWhenNoCsvFiles() {
+        AppImportProperties props = new AppImportProperties(tempDir.toString());
+        csvImportService = new CsvImportService(jdbcTemplate, props, 100);
+        org.junit.jupiter.api.Assertions.assertThrows(
+                IllegalStateException.class, () -> csvImportService.validateDirectory());
     }
 
     @Test
