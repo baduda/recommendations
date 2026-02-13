@@ -30,13 +30,13 @@ class PriceRepositoryTest extends BaseIntegrationTest {
         var entity = new PriceEntity("BTC", new BigDecimal("50000.00000000"), now);
         var saved = priceRepository.save(entity);
 
-        assertThat(saved.id()).isNotNull();
-        assertThat(saved.createdAt()).isNotNull();
+        assertThat(saved.getId()).isNotNull();
+        assertThat(saved.getCreatedAt()).isNotNull();
 
-        var found = priceRepository.findById(saved.id());
+        var found = priceRepository.findById(saved.getId());
         assertThat(found).isPresent();
-        assertThat(found.get().symbol()).isEqualTo("BTC");
-        assertThat(found.get().price()).isEqualByComparingTo("50000");
+        assertThat(found.get().getSymbol()).isEqualTo("BTC");
+        assertThat(found.get().getPrice()).isEqualByComparingTo("50000");
     }
 
     @Test
@@ -54,10 +54,10 @@ class PriceRepositoryTest extends BaseIntegrationTest {
         var newest = priceRepository.findFirstBySymbolOrderByPriceTimestampDesc(symbol);
 
         assertThat(oldest).isPresent();
-        assertThat(oldest.get().price()).isEqualByComparingTo("2000");
+        assertThat(oldest.get().getPrice()).isEqualByComparingTo("2000");
 
         assertThat(newest).isPresent();
-        assertThat(newest.get().price()).isEqualByComparingTo("2050");
+        assertThat(newest.get().getPrice()).isEqualByComparingTo("2050");
     }
 
     @Test

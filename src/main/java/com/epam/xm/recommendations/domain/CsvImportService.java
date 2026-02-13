@@ -13,7 +13,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,13 +22,11 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Stream;
 
 @Service
 public class CsvImportService {
-    private static final Logger log = LoggerFactory.getLogger(CsvImportService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CsvImportService.class);
 
     private final JdbcTemplate jdbcTemplate;
     private final String etlDirectory;
@@ -51,12 +48,13 @@ public class CsvImportService {
     @Scheduled(cron = "${app.etl.cron}")
     @SchedulerLock(name = "csvImportLock", lockAtLeastFor = "10s", lockAtMostFor = "10m")
     @CacheEvict(value = {"crypto-stats", "crypto-ranges"}, allEntries = true)
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
     public void importCsvFiles() {
-        log.info("Starting CSV import from directory: {}", etlDirectory);
+        LOGGER.info("Starting CSV import from directory: {}", etlDirectory);
         var rootPath = Path.of(etlDirectory);
 
         if (!Files.exists(rootPath) || !Files.isDirectory(rootPath)) {
-            log.error("ETL directory does not exist or is not a directory: {}", etlDirectory);
+            LOGGER.error("ETL directory does not exist or is not a directory: {}", etlDirectory);
             return;
         }
 
@@ -67,28 +65,29 @@ public class CsvImportService {
                  .forEach(path -> executor.submit(() -> {
                      try {
                          processFile(path);
-                     } catch (Exception e) {
-                         log.error("Error processing file {}: {}", path.getFileName(), e.getMessage(), e);
+                     } catch (RuntimeException e) {
+                         LOGGER.error("Error processing file {}: {}", path.getFileName(), e.getMessage(), e);
                      }
                  }));
             
         } catch (IOException e) {
-            log.error("Error listing files in directory: {}", etlDirectory, e);
+            LOGGER.error("Error listing files in directory: {}", etlDirectory, e);
         }
-        log.info("CSV import task submitted to virtual threads.");
+        LOGGER.info("CSV import task submitted to virtual threads.");
     }
 
+    @SuppressWarnings("PMD.AvoidCatchingGenericException")
     private void processFile(Path path) {
-        log.info("Processing file: {}", path.getFileName());
+        LOGGER.info("Processing file: {}", path.getFileName());
         int totalRows = 0;
         int insertedRows = 0;
         int skippedRows = 0;
 
-        try (var is = Files.newInputStream(path)) {
-            MappingIterator<Map<?, ?>> it = csvMapper
+        try (var is = Files.newInputStream(path);
+             MappingIterator<Map<?, ?>> it = csvMapper
                     .readerFor(Map.class)
                     .with(csvSchema)
-                    .readValues(is);
+                    .readValues(is)) {
 
             var batch = new ArrayList<Object[]>();
 
@@ -103,8 +102,8 @@ public class CsvImportService {
                         insertedRows += executeBatch(batch);
                         batch.clear();
                     }
-                } catch (Exception e) {
-                    log.warn("Skipping damaged row in file {}: {}", path.getFileName(), e.getMessage());
+                } catch (RuntimeException e) {
+                    LOGGER.warn("Skipping damaged row in file {}: {}", path.getFileName(), e.getMessage());
                     skippedRows++;
                 }
             }
@@ -113,11 +112,11 @@ public class CsvImportService {
                 insertedRows += executeBatch(batch);
             }
 
-            log.info("Finished processing {}: Total rows: {}, Inserted/Updated: {}, Skipped: {}", 
+            LOGGER.info("Finished processing {}: Total rows: {}, Inserted/Updated: {}, Skipped: {}", 
                     path.getFileName(), totalRows, insertedRows, skippedRows);
 
         } catch (IOException e) {
-            log.error("Failed to process file: {}", path, e);
+            LOGGER.error("Failed to process file: {}", path, e);
         }
     }
 

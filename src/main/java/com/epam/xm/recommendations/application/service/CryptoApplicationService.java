@@ -43,7 +43,7 @@ public class CryptoApplicationService {
         return analysisService.calculateStats(symbol, mapToPricePoints(entities));
     }
 
-    @Cacheable(value = "crypto-ranges")
+    @Cacheable("crypto-ranges")
     public List<CryptoStats> getAllSortedStats() {
         List<String> symbols = priceRepository.findAllSymbols();
         return symbols.stream()
@@ -64,11 +64,11 @@ public class CryptoApplicationService {
                 .map(s -> {
                     List<PriceEntity> entities = priceRepository.findAllBySymbolAndPriceTimestampBetween(s, start, end);
                     if (entities.isEmpty()) {
-                        return (CryptoStats) null;
+                        return null;
                     }
                     return analysisService.calculateStats(s, mapToPricePoints(entities));
                 })
-                .filter(s -> s != null)
+                .filter(java.util.Objects::nonNull)
                 .max(Comparator.comparing(CryptoStats::normalizedRange));
     }
 
@@ -80,7 +80,7 @@ public class CryptoApplicationService {
 
     private List<PricePoint> mapToPricePoints(List<PriceEntity> entities) {
         return entities.stream()
-                .map(e -> new PricePoint(e.priceTimestamp().toInstant(), e.symbol(), e.price()))
+                .map(e -> new PricePoint(e.getPriceTimestamp().toInstant(), e.getSymbol(), e.getPrice()))
                 .toList();
     }
 }

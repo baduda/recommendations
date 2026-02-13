@@ -18,14 +18,14 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(CryptoNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ApiResponse(responseCode = "404", description = "Crypto not found",
             content = @Content(schema = @Schema(implementation = ApiError.class)))
     public ApiError handleNotFound(CryptoNotFoundException ex, HttpServletRequest request) {
-        log.warn("Resource not found: {} at path: {}", ex.getMessage(), request.getRequestURI());
+        LOGGER.warn("Resource not found: {} at path: {}", ex.getMessage(), request.getRequestURI());
         return new ApiError(
                 Instant.now(),
                 HttpStatus.NOT_FOUND.value(),
@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
     @ApiResponse(responseCode = "400", description = "Unsupported crypto symbol",
             content = @Content(schema = @Schema(implementation = ApiError.class)))
     public ApiError handleUnsupported(UnsupportedCryptoException ex, HttpServletRequest request) {
-        log.warn("Unsupported crypto: {} at path: {}", ex.getMessage(), request.getRequestURI());
+        LOGGER.warn("Unsupported crypto: {} at path: {}", ex.getMessage(), request.getRequestURI());
         return new ApiError(
                 Instant.now(),
                 HttpStatus.BAD_REQUEST.value(),
@@ -55,7 +55,7 @@ public class GlobalExceptionHandler {
     @ApiResponse(responseCode = "422", description = "Invalid data provided",
             content = @Content(schema = @Schema(implementation = ApiError.class)))
     public ApiError handleInvalidData(InvalidDataException ex, HttpServletRequest request) {
-        log.warn("Invalid data: {} at path: {}", ex.getMessage(), request.getRequestURI());
+        LOGGER.warn("Invalid data: {} at path: {}", ex.getMessage(), request.getRequestURI());
         return new ApiError(
                 Instant.now(),
                 422,
@@ -73,7 +73,7 @@ public class GlobalExceptionHandler {
         String message = ex.getBindingResult().getFieldErrors().stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .collect(Collectors.joining(", "));
-        log.warn("Validation failed: {} at path: {}", message, request.getRequestURI());
+        LOGGER.warn("Validation failed: {} at path: {}", message, request.getRequestURI());
         return new ApiError(
                 Instant.now(),
                 HttpStatus.BAD_REQUEST.value(),
@@ -88,7 +88,7 @@ public class GlobalExceptionHandler {
     @ApiResponse(responseCode = "429", description = "Too Many Requests",
             content = @Content(schema = @Schema(implementation = ApiError.class)))
     public ApiError handleRateLimit(RateLimitExceededException ex, HttpServletRequest request) {
-        log.warn("Rate limit exceeded for path: {}", request.getRequestURI());
+        LOGGER.warn("Rate limit exceeded for path: {}", request.getRequestURI());
         return new ApiError(
                 Instant.now(),
                 HttpStatus.TOO_MANY_REQUESTS.value(),
@@ -103,7 +103,7 @@ public class GlobalExceptionHandler {
     @ApiResponse(responseCode = "500", description = "Internal server error",
             content = @Content(schema = @Schema(implementation = ApiError.class)))
     public ApiError handleGeneralError(Exception ex, HttpServletRequest request) {
-        log.error("Unexpected error occurred at path: {}", request.getRequestURI(), ex);
+        LOGGER.error("Unexpected error occurred at path: {}", request.getRequestURI(), ex);
         return new ApiError(
                 Instant.now(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),

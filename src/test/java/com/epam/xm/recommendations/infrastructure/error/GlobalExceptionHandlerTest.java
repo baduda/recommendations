@@ -27,37 +27,49 @@ class GlobalExceptionHandlerTest {
     @Test
     void handleNotFound() {
         CryptoNotFoundException ex = new CryptoNotFoundException("Not found");
-        CryptoNotFoundException exWithCause = new CryptoNotFoundException("Not found", new RuntimeException());
         ApiError error = handler.handleNotFound(ex, request);
         assertEquals(HttpStatus.NOT_FOUND.value(), error.status());
         assertEquals("Not found", error.message());
+
+        // Cover the constructor with cause to satisfy JaCoCo
+        CryptoNotFoundException exWithCause = new CryptoNotFoundException("Not found", new RuntimeException());
+        assertEquals("Not found", exWithCause.getMessage());
     }
 
     @Test
     void handleUnsupported() {
         UnsupportedCryptoException ex = new UnsupportedCryptoException("Unsupported");
-        UnsupportedCryptoException exWithCause = new UnsupportedCryptoException("Unsupported", new RuntimeException());
         ApiError error = handler.handleUnsupported(ex, request);
         assertEquals(HttpStatus.BAD_REQUEST.value(), error.status());
         assertEquals("Unsupported", error.message());
+
+        // Cover the constructor with cause to satisfy JaCoCo
+        UnsupportedCryptoException exWithCause = new UnsupportedCryptoException("Unsupported", new RuntimeException());
+        assertEquals("Unsupported", exWithCause.getMessage());
     }
 
     @Test
     void handleInvalidData() {
         InvalidDataException ex = new InvalidDataException("Invalid");
-        InvalidDataException exWithCause = new InvalidDataException("Invalid", new RuntimeException());
         ApiError error = handler.handleInvalidData(ex, request);
         assertEquals(422, error.status());
         assertEquals("Invalid", error.message());
+
+        // Cover the constructor with cause to satisfy JaCoCo
+        InvalidDataException exWithCause = new InvalidDataException("Invalid", new RuntimeException());
+        assertEquals("Invalid", exWithCause.getMessage());
     }
 
     @Test
     void handleRateLimit() {
         RateLimitExceededException ex = new RateLimitExceededException("Limit");
-        RateLimitExceededException exWithCause = new RateLimitExceededException("Limit", new RuntimeException());
         ApiError error = handler.handleRateLimit(ex, request);
         assertEquals(HttpStatus.TOO_MANY_REQUESTS.value(), error.status());
         assertEquals("Limit", error.message());
+
+        // Cover the constructor with cause to satisfy JaCoCo
+        RateLimitExceededException exWithCause = new RateLimitExceededException("Limit", new RuntimeException());
+        assertEquals("Limit", exWithCause.getMessage());
     }
 
     @Test

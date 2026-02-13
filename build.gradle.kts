@@ -3,6 +3,8 @@ plugins {
     id("org.springframework.boot") version "4.0.2"
     id("io.spring.dependency-management") version "1.1.7"
     jacoco
+    id("com.github.spotbugs") version "6.1.5"
+    pmd
 }
 
 group = "com.epam.xm"
@@ -45,6 +47,14 @@ dependencies {
     testImplementation("org.testcontainers:junit-jupiter:1.20.5")
     testImplementation("org.testcontainers:postgresql:1.20.5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    "spotbugs"("com.github.spotbugs:spotbugs:4.9.0")
+    configurations.all {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "org.ow2.asm") {
+                useVersion("9.8")
+            }
+        }
+    }
 }
 
 tasks.withType<JavaCompile>().configureEach {
@@ -118,4 +128,35 @@ tasks.withType<JacocoCoverageVerification> {
 
 tasks.check {
     dependsOn("jacocoTestCoverageVerification")
+    dependsOn("spotbugsMain")
+    dependsOn("pmdMain")
+}
+
+spotbugs {
+    ignoreFailures.set(false)
+    effort.set(com.github.spotbugs.snom.Effort.MAX)
+    reportLevel.set(com.github.spotbugs.snom.Confidence.HIGH)
+    toolVersion.set("4.9.0")
+    excludeFilter.set(file("config/spotbugs/spotbugs-exclude.xml"))
+}
+
+// MapStruct generates code that SpotBugs might not like, and it's already excluded in filter.
+// But if analysis fails completely due to JDK 25, we might need to wait for SpotBugs update.
+
+pmd {
+    isConsoleOutput = true
+    toolVersion = "7.10.0"
+    ruleSetFiles = files("config/pmd/ruleset.xml")
+    ruleSets = listOf() // Clear default rulesets to use only our custom one
+}
+
+tasks.withType<Pmd>().configureEach {
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+}
+
+tasks.named<Pmd>("pmdTest") {
+    isEnabled = false
 }

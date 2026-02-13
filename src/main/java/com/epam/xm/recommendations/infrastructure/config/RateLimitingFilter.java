@@ -3,7 +3,6 @@ package com.epam.xm.recommendations.infrastructure.config;
 import com.epam.xm.recommendations.infrastructure.error.RateLimitExceededException;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
-import io.github.bucket4j.Refill;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class RateLimitingFilter extends OncePerRequestFilter {
 
-    private static final Logger log = LoggerFactory.getLogger(RateLimitingFilter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RateLimitingFilter.class);
 
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
     private final HandlerExceptionResolver handlerExceptionResolver;
@@ -37,6 +36,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
             @Qualifier("handlerExceptionResolver") HandlerExceptionResolver handlerExceptionResolver,
             @Value("${app.rate-limit.capacity:10}") int capacity,
             @Value("${app.rate-limit.tokens-per-minute:10}") int tokensPerMinute) {
+        super();
         this.handlerExceptionResolver = handlerExceptionResolver;
         this.capacity = capacity;
         this.tokensPerMinute = tokensPerMinute;
@@ -52,7 +52,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
         if (bucket.tryConsume(1)) {
             filterChain.doFilter(request, response);
         } else {
-            log.warn("Rate limit exceeded for IP: {}", ip);
+            LOGGER.warn("Rate limit exceeded for IP: {}", ip);
             handlerExceptionResolver.resolveException(request, response, null,
                     new RateLimitExceededException("Rate limit exceeded. Try again later."));
         }

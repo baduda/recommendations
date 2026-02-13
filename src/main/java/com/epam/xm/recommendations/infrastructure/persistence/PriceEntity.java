@@ -50,23 +50,23 @@ public class PriceEntity {
         this.priceTimestamp = priceTimestamp;
     }
 
-    public Long id() {
+    public Long getId() {
         return id;
     }
 
-    public String symbol() {
+    public String getSymbol() {
         return symbol;
     }
 
-    public BigDecimal price() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public OffsetDateTime priceTimestamp() {
+    public OffsetDateTime getPriceTimestamp() {
         return priceTimestamp;
     }
 
-    public OffsetDateTime createdAt() {
+    public OffsetDateTime getCreatedAt() {
         return createdAt;
     }
 }
