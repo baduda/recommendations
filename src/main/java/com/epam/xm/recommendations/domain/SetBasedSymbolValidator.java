@@ -3,11 +3,10 @@ package com.epam.xm.recommendations.domain;
 import java.util.Collection;
 import java.util.Set;
 
-public class SetBasedSymbolValidator implements SymbolValidator {
-    private final Set<String> supportedSymbols;
+public record SetBasedSymbolValidator(Set<String> supportedSymbols) implements SymbolValidator {
 
     public SetBasedSymbolValidator(Collection<String> supportedSymbols) {
-        this.supportedSymbols = Set.copyOf(supportedSymbols);
+        this(Set.copyOf(supportedSymbols));
     }
 
     @Override
