@@ -15,6 +15,11 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
+@org.springframework.test.context.TestPropertySource(properties = {
+    "spring.jpa.hibernate.ddl-auto=none",
+    "spring.flyway.enabled=true",
+    "spring.flyway.locations=classpath:db/migration"
+})
 @Transactional
 @Import(TestcontainersConfiguration.class)
 class PriceRepositoryTest {
@@ -22,8 +27,12 @@ class PriceRepositoryTest {
     @Autowired
     private PriceRepository priceRepository;
 
+    @Autowired
+    private org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
+
     @BeforeEach
     void setUp() {
+        jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS crypto_prices (id BIGSERIAL PRIMARY KEY, symbol VARCHAR(10), price NUMERIC, price_timestamp TIMESTAMP WITH TIME ZONE, created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(), UNIQUE(symbol, price_timestamp))");
         priceRepository.deleteAll();
     }
 

@@ -10,9 +10,14 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "crypto_prices", indexes = {
-    @Index(name = "idx_crypto_prices_symbol_timestamp", columnList = "symbol, price_timestamp DESC")
-})
+@Table(name = "crypto_prices", 
+    indexes = {
+        @Index(name = "idx_crypto_prices_symbol_timestamp", columnList = "symbol, price_timestamp DESC")
+    },
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uq_crypto_prices_symbol_timestamp", columnNames = {"symbol", "price_timestamp"})
+    }
+)
 public class PriceEntity {
 
     @Id
