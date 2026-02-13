@@ -18,7 +18,7 @@ spring:
     baseline-on-migrate: true
     check-location: true
     clean-disabled: false
-    # Принудительно задаем схему, если нужно
+    # Force specific schema if needed
     # default-schema: public
   jpa:
     show-sql: false
@@ -62,3 +62,9 @@ management:
   endpoint:
     health:
       show-details: always
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs

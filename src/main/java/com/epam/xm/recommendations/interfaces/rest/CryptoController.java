@@ -22,7 +22,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/crypto")
-@Tag(name = "Crypto Stats API", description = "Эндпоинты для получения аналитики по криптовалютам")
+@Tag(name = "Crypto Stats API", description = "Endpoints for cryptocurrency analytics")
 @Validated
 public class CryptoController {
 
@@ -35,26 +35,30 @@ public class CryptoController {
     }
 
     @Operation(
-            summary = "Получить статистику по конкретной монете",
-            description = "Возвращает oldest, newest, min и max цены за весь период",
+            summary = "Get statistics for a specific coin",
+            description = "Returns oldest, newest, min, and max prices for the entire period",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Успешный ответ"),
-                    @ApiResponse(responseCode = "404", description = "Данные по монете не найдены", content = @Content(schema = @Schema(implementation = ApiError.class))),
-                    @ApiResponse(responseCode = "400", description = "Тикер не поддерживается", content = @Content(schema = @Schema(implementation = ApiError.class)))
+                    @ApiResponse(responseCode = "200", description = "Successful response"),
+                    @ApiResponse(responseCode = "400", description = "Invalid request or unsupported ticker", content = @Content(schema = @Schema(implementation = ApiError.class))),
+                    @ApiResponse(responseCode = "404", description = "Coin data not found", content = @Content(schema = @Schema(implementation = ApiError.class))),
+                    @ApiResponse(responseCode = "429", description = "Rate limit exceeded", content = @Content(schema = @Schema(implementation = ApiError.class)))
             }
     )
     @GetMapping("/stats/{symbol}")
     public ResponseEntity<CryptoStatsDto> getStats(
-            @Parameter(description = "Тикер монеты (напр. BTC)", example = "BTC")
+            @Parameter(description = "Coin ticker (e.g., BTC)", example = "BTC")
             @PathVariable @Pattern(regexp = "^[A-Z]{3,10}$", message = "Symbol must be 3-10 uppercase letters") String symbol) {
         return ResponseEntity.ok(cryptoMapper.toDto(cryptoService.getStats(symbol)));
     }
 
     @Operation(
-            summary = "Получить список всех монет, отсортированный по волатильности",
-            description = "Сортировка по убыванию normalized range (max-min)/min",
+            summary = "Get all coins sorted by volatility",
+            description = "Sorts by descending normalized range (max-min)/min",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Успешный ответ")
+                    @ApiResponse(responseCode = "200", description = "Successful response"),
+                    @ApiResponse(responseCode = "400", description = "Invalid request", content = @Content(schema = @Schema(implementation = ApiError.class))),
+                    @ApiResponse(responseCode = "404", description = "Data not found", content = @Content(schema = @Schema(implementation = ApiError.class))),
+                    @ApiResponse(responseCode = "429", description = "Rate limit exceeded", content = @Content(schema = @Schema(implementation = ApiError.class)))
             }
     )
     @GetMapping("/sorted")
@@ -65,16 +69,18 @@ public class CryptoController {
     }
 
     @Operation(
-            summary = "Монета с самым высоким range за день",
-            description = "Возвращает одну монету с самым высоким normalized range за указанные сутки",
+            summary = "Coin with the highest range for a specific day",
+            description = "Returns a single coin with the highest normalized range for the specified date",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Успешный ответ"),
-                    @ApiResponse(responseCode = "404", description = "Нет данных за указанную дату", content = @Content(schema = @Schema(implementation = ApiError.class)))
+                    @ApiResponse(responseCode = "200", description = "Successful response"),
+                    @ApiResponse(responseCode = "400", description = "Invalid date format", content = @Content(schema = @Schema(implementation = ApiError.class))),
+                    @ApiResponse(responseCode = "404", description = "No data for the specified date", content = @Content(schema = @Schema(implementation = ApiError.class))),
+                    @ApiResponse(responseCode = "429", description = "Rate limit exceeded", content = @Content(schema = @Schema(implementation = ApiError.class)))
             }
     )
     @GetMapping("/highest-range")
     public ResponseEntity<CryptoRangeDto> getHighestRange(
-            @Parameter(description = "Дата в формате yyyy-MM-dd", example = "2022-01-01")
+            @Parameter(description = "Date in yyyy-MM-dd format", example = "2022-01-01")
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return cryptoService.getHighestRangeForDate(date)
                 .map(cryptoMapper::toRangeDto)

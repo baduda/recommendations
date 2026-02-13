@@ -30,7 +30,7 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5")
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-database-postgresql")
-    // Добавляем зависимость для автоконфигурации, если она не подтянулась
+    // Add dependency for autoconfiguration if not included automatically
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
     implementation("net.javacrumbs.shedlock:shedlock-spring:6.3.0")
     implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.3.0")
