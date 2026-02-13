@@ -1,10 +1,13 @@
 package com.epam.xm.recommendations.domain;
 
+import org.springframework.stereotype.Service;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Comparator;
 import java.util.List;
 
+@Service
 public class CryptoAnalysisService {
 
     public CryptoStats calculateStats(String symbol, List<PricePoint> pricePoints) {

@@ -51,14 +51,14 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidDataException.class)
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_CONTENT)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     @ApiResponse(responseCode = "422", description = "Invalid data provided",
             content = @Content(schema = @Schema(implementation = ApiError.class)))
     public ApiError handleInvalidData(InvalidDataException ex, HttpServletRequest request) {
         log.warn("Invalid data: {} at path: {}", ex.getMessage(), request.getRequestURI());
         return new ApiError(
                 Instant.now(),
-                HttpStatus.UNPROCESSABLE_CONTENT.value(),
+                422,
                 "UNPROCESSABLE_ENTITY",
                 ex.getMessage(),
                 request.getRequestURI()

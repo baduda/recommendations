@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -37,4 +38,11 @@ public interface PriceRepository extends JpaRepository<PriceEntity, Long> {
     Optional<BigDecimal> findMaxPrice(@Param("symbol") String symbol, 
                                       @Param("start") OffsetDateTime start, 
                                       @Param("end") OffsetDateTime end);
+
+    @Query("SELECT DISTINCT p.symbol FROM PriceEntity p")
+    List<String> findAllSymbols();
+
+    List<PriceEntity> findAllBySymbol(String symbol);
+
+    List<PriceEntity> findAllBySymbolAndPriceTimestampBetween(String symbol, OffsetDateTime start, OffsetDateTime end);
 }

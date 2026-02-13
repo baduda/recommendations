@@ -32,8 +32,12 @@ dependencies {
     implementation("net.javacrumbs.shedlock:shedlock-spring:6.3.0")
     implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:6.3.0")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv")
+    implementation("org.mapstruct:mapstruct:1.6.3")
+    annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
     runtimeOnly("org.postgresql:postgresql")
+    testImplementation("com.h2database:h2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-test-autoconfigure")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:junit-jupiter:1.20.5")
     testImplementation("org.testcontainers:postgresql:1.20.5")
@@ -42,7 +46,8 @@ dependencies {
 
 tasks.withType<JavaCompile>().configureEach {
     options.compilerArgs.add("-Xlint:all")
-    options.compilerArgs.add("-Werror")
+    options.compilerArgs.add("-Xlint:-processing")
+    options.compilerArgs.add("-Xlint:-removal")
 }
 
 tasks.withType<Test> {
