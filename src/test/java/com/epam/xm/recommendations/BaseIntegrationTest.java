@@ -1,21 +1,17 @@
 package com.epam.xm.recommendations;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.junit.jupiter.api.BeforeEach;
-
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
-
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
+import org.testcontainers.containers.PostgreSQLContainer;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -41,16 +37,19 @@ public abstract class BaseIntegrationTest {
 
     @BeforeAll
     static void migrateFlyway() {
-        Flyway flyway = Flyway.configure()
-                .dataSource(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword())
-                .locations("classpath:db/migration")
-                .load();
+        Flyway flyway =
+                Flyway.configure()
+                        .dataSource(
+                                postgres.getJdbcUrl(),
+                                postgres.getUsername(),
+                                postgres.getPassword())
+                        .locations("classpath:db/migration")
+                        .load();
         flyway.repair();
         flyway.migrate();
     }
 
-    @Autowired
-    protected WebApplicationContext context;
+    @Autowired protected WebApplicationContext context;
 
     protected MockMvc mockMvc;
 
@@ -58,5 +57,4 @@ public abstract class BaseIntegrationTest {
     void setUpMockMvc() {
         this.mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
     }
-
 }

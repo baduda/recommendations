@@ -1,18 +1,17 @@
 package com.epam.xm.recommendations.infrastructure.error;
 
-import jakarta.servlet.http.HttpServletRequest;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 class GlobalExceptionHandlerTest {
 
@@ -32,7 +31,8 @@ class GlobalExceptionHandlerTest {
         assertEquals("Not found", error.message());
 
         // Cover the constructor with cause to satisfy JaCoCo
-        CryptoNotFoundException exWithCause = new CryptoNotFoundException("Not found", new RuntimeException());
+        CryptoNotFoundException exWithCause =
+                new CryptoNotFoundException("Not found", new RuntimeException());
         assertEquals("Not found", exWithCause.getMessage());
     }
 
@@ -44,7 +44,8 @@ class GlobalExceptionHandlerTest {
         assertEquals("Unsupported", error.message());
 
         // Cover the constructor with cause to satisfy JaCoCo
-        UnsupportedCryptoException exWithCause = new UnsupportedCryptoException("Unsupported", new RuntimeException());
+        UnsupportedCryptoException exWithCause =
+                new UnsupportedCryptoException("Unsupported", new RuntimeException());
         assertEquals("Unsupported", exWithCause.getMessage());
     }
 
@@ -56,7 +57,8 @@ class GlobalExceptionHandlerTest {
         assertEquals("Invalid", error.message());
 
         // Cover the constructor with cause to satisfy JaCoCo
-        InvalidDataException exWithCause = new InvalidDataException("Invalid", new RuntimeException());
+        InvalidDataException exWithCause =
+                new InvalidDataException("Invalid", new RuntimeException());
         assertEquals("Invalid", exWithCause.getMessage());
     }
 
@@ -68,7 +70,8 @@ class GlobalExceptionHandlerTest {
         assertEquals("Limit", error.message());
 
         // Cover the constructor with cause to satisfy JaCoCo
-        RateLimitExceededException exWithCause = new RateLimitExceededException("Limit", new RuntimeException());
+        RateLimitExceededException exWithCause =
+                new RateLimitExceededException("Limit", new RuntimeException());
         assertEquals("Limit", exWithCause.getMessage());
     }
 
@@ -84,11 +87,12 @@ class GlobalExceptionHandlerTest {
     void handleValidationErrors() {
         MethodArgumentNotValidException ex = mock(MethodArgumentNotValidException.class);
         BindingResult bindingResult = mock(BindingResult.class);
-        FieldError fieldError = new FieldError("obj", "field", "rejected", false, null, null, "default message");
-        
+        FieldError fieldError =
+                new FieldError("obj", "field", "rejected", false, null, null, "default message");
+
         when(ex.getBindingResult()).thenReturn(bindingResult);
         when(bindingResult.getFieldErrors()).thenReturn(List.of(fieldError));
-        
+
         ApiError error = handler.handleValidationErrors(ex, request);
         assertEquals(HttpStatus.BAD_REQUEST.value(), error.status());
         assertEquals("field: default message", error.message());

@@ -7,9 +7,8 @@ import java.time.Instant;
  * A single market observation point.
  *
  * @param timestamp UTC instant of the quote
- * @param symbol    coin ticker, cannot be blank
- * @param price     strictly positive monetary value represented as {@link java.math.BigDecimal}
- * @throws IllegalArgumentException if {@code symbol} is blank or {@code price} is not positive
+ * @param symbol coin ticker, cannot be blank
+ * @param price strictly positive monetary value represented as {@link java.math.BigDecimal}
  */
 public record PricePoint(Instant timestamp, String symbol, BigDecimal price) {
     public PricePoint {

@@ -5,6 +5,7 @@ plugins {
     jacoco
     id("com.github.spotbugs") version "6.1.5"
     pmd
+    id("com.diffplug.spotless") version "8.2.1"
 }
 
 group = "com.epam.xm"
@@ -70,15 +71,16 @@ tasks.withType<Test> {
     finalizedBy("jacocoTestReport")
 }
 
-val jacocoExcludes = listOf(
-    "**/dto/**",
-    "**/persistence/*Entity*",
-    "**/config/**",
-    "**/*Application*",
-    "**/infrastructure/error/ApiError*",
-    "**/domain/PricePoint*",
-    "**/domain/CryptoStats*"
-)
+val jacocoExcludes =
+    listOf(
+        "**/dto/**",
+        "**/persistence/*Entity*",
+        "**/config/**",
+        "**/*Application*",
+        "**/infrastructure/error/ApiError*",
+        "**/domain/PricePoint*",
+        "**/domain/CryptoStats*",
+    )
 
 tasks.withType<JacocoReport> {
     dependsOn(tasks.test)
@@ -89,7 +91,7 @@ tasks.withType<JacocoReport> {
     classDirectories.setFrom(
         sourceSets.main.get().output.asFileTree.matching {
             exclude(jacocoExcludes)
-        }
+        },
     )
 }
 
@@ -113,15 +115,16 @@ tasks.withType<JacocoCoverageVerification> {
                 value = "COVEREDRATIO"
                 minimum = "0.80".toBigDecimal()
             }
-            excludes = listOf(
-                "*.dto.*",
-                "*.persistence.*Entity*",
-                "*.config.*",
-                "*Application*",
-                "*.infrastructure.error.ApiError*",
-                "*.domain.PricePoint*",
-                "*.domain.CryptoStats*"
-            )
+            excludes =
+                listOf(
+                    "*.dto.*",
+                    "*.persistence.*Entity*",
+                    "*.config.*",
+                    "*Application*",
+                    "*.infrastructure.error.ApiError*",
+                    "*.domain.PricePoint*",
+                    "*.domain.CryptoStats*",
+                )
         }
     }
 }
@@ -159,4 +162,18 @@ tasks.withType<Pmd>().configureEach {
 
 tasks.named<Pmd>("pmdTest") {
     isEnabled = false
+}
+
+spotless {
+    java {
+        target("src/**/*.java")
+        googleJavaFormat("1.34.1").aosp()
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    kotlinGradle {
+        target("*.gradle.kts")
+        ktlint()
+    }
 }

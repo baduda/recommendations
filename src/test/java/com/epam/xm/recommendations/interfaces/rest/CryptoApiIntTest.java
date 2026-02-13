@@ -1,40 +1,53 @@
 package com.epam.xm.recommendations.interfaces.rest;
 
-import com.epam.xm.recommendations.BaseIntegrationTest;
-import com.epam.xm.recommendations.infrastructure.persistence.PriceEntity;
-import com.epam.xm.recommendations.infrastructure.persistence.PriceRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.math.BigDecimal;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.epam.xm.recommendations.BaseIntegrationTest;
+import com.epam.xm.recommendations.infrastructure.persistence.PriceEntity;
+import com.epam.xm.recommendations.infrastructure.persistence.PriceRepository;
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
 public class CryptoApiIntTest extends BaseIntegrationTest {
 
-    @Autowired
-    private PriceRepository priceRepository;
+    @Autowired private PriceRepository priceRepository;
 
     @BeforeEach
     void setup() {
         priceRepository.deleteAll();
-        
-        priceRepository.save(new PriceEntity("BTC", new BigDecimal("40000"), 
-                OffsetDateTime.of(2022, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC)));
-        priceRepository.save(new PriceEntity("BTC", new BigDecimal("45000"), 
-                OffsetDateTime.of(2022, 1, 1, 12, 0, 0, 0, ZoneOffset.UTC)));
-        priceRepository.save(new PriceEntity("BTC", new BigDecimal("35000"), 
-                OffsetDateTime.of(2022, 1, 1, 8, 0, 0, 0, ZoneOffset.UTC)));
 
-        priceRepository.save(new PriceEntity("ETH", new BigDecimal("2000"), 
-                OffsetDateTime.of(2022, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC)));
-        priceRepository.save(new PriceEntity("ETH", new BigDecimal("2500"), 
-                OffsetDateTime.of(2022, 1, 1, 12, 0, 0, 0, ZoneOffset.UTC)));
+        priceRepository.save(
+                new PriceEntity(
+                        "BTC",
+                        new BigDecimal("40000"),
+                        OffsetDateTime.of(2022, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC)));
+        priceRepository.save(
+                new PriceEntity(
+                        "BTC",
+                        new BigDecimal("45000"),
+                        OffsetDateTime.of(2022, 1, 1, 12, 0, 0, 0, ZoneOffset.UTC)));
+        priceRepository.save(
+                new PriceEntity(
+                        "BTC",
+                        new BigDecimal("35000"),
+                        OffsetDateTime.of(2022, 1, 1, 8, 0, 0, 0, ZoneOffset.UTC)));
+
+        priceRepository.save(
+                new PriceEntity(
+                        "ETH",
+                        new BigDecimal("2000"),
+                        OffsetDateTime.of(2022, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC)));
+        priceRepository.save(
+                new PriceEntity(
+                        "ETH",
+                        new BigDecimal("2500"),
+                        OffsetDateTime.of(2022, 1, 1, 12, 0, 0, 0, ZoneOffset.UTC)));
     }
 
     @Test

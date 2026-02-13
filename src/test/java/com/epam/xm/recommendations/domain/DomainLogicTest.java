@@ -1,13 +1,13 @@
 package com.epam.xm.recommendations.domain;
 
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import org.junit.jupiter.api.Test;
 
 class DomainLogicTest {
 
@@ -17,12 +17,12 @@ class DomainLogicTest {
     void testCalculateStatsCorrectness() {
         var symbol = "BTC";
         var now = Instant.now();
-        var points = List.of(
-                new PricePoint(now.minusSeconds(100), symbol, new BigDecimal("40000")),
-                new PricePoint(now.minusSeconds(50), symbol, new BigDecimal("42000")),
-                new PricePoint(now, symbol, new BigDecimal("41000")),
-                new PricePoint(now.plusSeconds(50), symbol, new BigDecimal("38000"))
-        );
+        var points =
+                List.of(
+                        new PricePoint(now.minusSeconds(100), symbol, new BigDecimal("40000")),
+                        new PricePoint(now.minusSeconds(50), symbol, new BigDecimal("42000")),
+                        new PricePoint(now, symbol, new BigDecimal("41000")),
+                        new PricePoint(now.plusSeconds(50), symbol, new BigDecimal("38000")));
 
         var stats = analysisService.calculateStats(symbol, points);
 
@@ -31,7 +31,8 @@ class DomainLogicTest {
         assertThat(stats.newestPrice()).isEqualByComparingTo(new BigDecimal("38000"));
         assertThat(stats.minPrice()).isEqualByComparingTo(new BigDecimal("38000"));
         assertThat(stats.maxPrice()).isEqualByComparingTo(new BigDecimal("42000"));
-        // (42000 - 38000) / 38000 = 4000 / 38000 = 0.10526... -> 0.1053 (RoundingMode.HALF_UP, 4 scale)
+        // (42000 - 38000) / 38000 = 4000 / 38000 = 0.10526... -> 0.1053 (RoundingMode.HALF_UP, 4
+        // scale)
         assertThat(stats.normalizedRange()).isEqualByComparingTo(new BigDecimal("0.1053"));
     }
 
@@ -56,10 +57,10 @@ class DomainLogicTest {
     @Test
     void testNormalizedRangeAccuracy() {
         var symbol = "ETH";
-        var points = List.of(
-                new PricePoint(Instant.now(), symbol, new BigDecimal("100")),
-                new PricePoint(Instant.now(), symbol, new BigDecimal("110"))
-        );
+        var points =
+                List.of(
+                        new PricePoint(Instant.now(), symbol, new BigDecimal("100")),
+                        new PricePoint(Instant.now(), symbol, new BigDecimal("110")));
         var stats = analysisService.calculateStats(symbol, points);
         // (110 - 100) / 100 = 10 / 100 = 0.1000
         assertThat(stats.normalizedRange()).isEqualByComparingTo(new BigDecimal("0.1000"));

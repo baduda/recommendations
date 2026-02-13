@@ -4,24 +4,27 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import org.hibernate.annotations.CreationTimestamp;
-
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
-@Table(name = "crypto_prices", 
-    indexes = {
-        @Index(name = "idx_crypto_prices_symbol_timestamp", columnList = "symbol, price_timestamp DESC")
-    },
-    uniqueConstraints = {
-        @UniqueConstraint(name = "uq_crypto_prices_symbol_timestamp", columnNames = {"symbol", "price_timestamp"})
-    }
-)
+@Table(
+        name = "crypto_prices",
+        indexes = {
+            @Index(
+                    name = "idx_crypto_prices_symbol_timestamp",
+                    columnList = "symbol, price_timestamp DESC")
+        },
+        uniqueConstraints = {
+            @UniqueConstraint(
+                    name = "uq_crypto_prices_symbol_timestamp",
+                    columnNames = {"symbol", "price_timestamp"})
+        })
 /**
  * JPA entity representing a single quote.
- * <p>
- * The composite index on (symbol, price_timestamp DESC) accelerates newest/oldest fetches and
+ *
+ * <p>The composite index on (symbol, price_timestamp DESC) accelerates newest/oldest fetches and
  * range scans. A unique constraint prevents duplicate ingestions for the same (symbol, timestamp).
  */
 public class PriceEntity {
@@ -47,8 +50,7 @@ public class PriceEntity {
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
-    public PriceEntity() {
-    }
+    public PriceEntity() {}
 
     public PriceEntity(String symbol, BigDecimal price, OffsetDateTime priceTimestamp) {
         this.symbol = symbol;

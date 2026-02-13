@@ -1,11 +1,10 @@
 package com.epam.xm.recommendations.domain;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 class SetBasedSymbolValidatorTest {
 

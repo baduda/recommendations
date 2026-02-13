@@ -9,9 +9,9 @@ import org.mapstruct.MappingConstants;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 /**
  * MapStruct mapper translating domain objects to API DTOs.
- * <p>
- * Mapping is kept trivial (field-to-field) to preserve domain-calculated values
- * such as normalized range without re-computation on the edges.
+ *
+ * <p>Mapping is kept trivial (field-to-field) to preserve domain-calculated values such as
+ * normalized range without re-computation on the edges.
  */
 public interface CryptoMapper {
     /**
