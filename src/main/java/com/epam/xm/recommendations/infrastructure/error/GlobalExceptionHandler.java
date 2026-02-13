@@ -16,6 +16,11 @@ import java.time.Instant;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
+/**
+ * Centralized translation of exceptions into RFC 7807-style API errors.
+ * <p>
+ * Keeps controller code lean and ensures consistent error shape across endpoints.
+ */
 public class GlobalExceptionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);

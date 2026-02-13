@@ -25,6 +25,17 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 
 @Service
+/**
+ * ETL service importing CSV price data into the database.
+ * <p>
+ * The import is executed on Java Virtual Threads (Project Loom) via
+ * {@code Executors.newVirtualThreadPerTaskExecutor()}. Virtual threads are
+ * chosen instead of a fixed platform-thread pool because file I/O and JDBC
+ * operations are predominantly blocking. Virtual threads allow us to scale the
+ * number of concurrent file processing tasks without tying up OS threads,
+ * improving throughput with minimal complexity and excellent observability.
+ * Batching is used to reduce JDBC round-trips.
+ */
 public class CsvImportService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CsvImportService.class);
 
@@ -50,6 +61,12 @@ public class CsvImportService {
     @CacheEvict(value = {"crypto-stats", "crypto-ranges"}, allEntries = true)
     @SuppressWarnings("PMD.AvoidCatchingGenericException")
     public void importCsvFiles() {
+        /**
+         * Triggers CSV import for all files in the configured ETL directory.
+         * Files are dispatched to virtual threads for parallel processing.
+         *
+         * Cache entries are evicted to ensure queries reflect new data.
+         */
         LOGGER.info("Starting CSV import from directory: {}", etlDirectory);
         var rootPath = Path.of(etlDirectory);
 
@@ -78,6 +95,11 @@ public class CsvImportService {
 
     @SuppressWarnings("PMD.AvoidCatchingGenericException")
     private void processFile(Path path) {
+        /**
+         * Parses and upserts a single CSV file into the database in batches.
+         *
+         * @param path path to the CSV file
+         */
         LOGGER.info("Processing file: {}", path.getFileName());
         int totalRows = 0;
         int insertedRows = 0;
@@ -120,7 +142,14 @@ public class CsvImportService {
         }
     }
 
-    private Object[] mapToParams(Map<?, ?> row) {
+    /**
+         * Maps a parsed CSV row into JDBC parameters.
+         *
+         * @param row parsed CSV row
+         * @return array of JDBC parameters [symbol, price, timestamp]
+         * @throws NumberFormatException if timestamp or price are not parseable
+         */
+        private Object[] mapToParams(Map<?, ?> row) {
         var timestamp = Long.parseLong(row.get("timestamp").toString());
         var symbol = row.get("symbol").toString();
         var price = new BigDecimal(row.get("price").toString());
@@ -130,7 +159,17 @@ public class CsvImportService {
         return new Object[]{symbol, price, dateTime};
     }
 
-    private int executeBatch(List<Object[]> batch) {
+    /**
+         * Executes batch upsert (with ON CONFLICT DO NOTHING) to persist rows.
+         *
+         * The unique constraint on (symbol, price_timestamp) prevents duplicates; the
+         * multi-column index on (symbol, price_timestamp DESC) accelerates both
+         * upsert conflict checks and later analytical queries (oldest/newest and ranges).
+         *
+         * @param batch list of parameter arrays built by {@link #mapToParams(Map)}
+         * @return number of successfully inserted rows
+         */
+        private int executeBatch(List<Object[]> batch) {
         var sql = """
                 INSERT INTO crypto_prices (symbol, price, price_timestamp)
                 VALUES (?, ?, ?)

@@ -22,6 +22,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
+/**
+ * Servlet filter enforcing per-IP rate limiting via Bucket4j.
+ * <p>
+ * The filter uses an in-memory map of token buckets keyed by client IP. On exhaustion,
+ * it delegates to {@link org.springframework.web.servlet.HandlerExceptionResolver}
+ * to produce a consistent RFC 7807 response.
+ */
 public class RateLimitingFilter extends OncePerRequestFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RateLimitingFilter.class);
@@ -45,6 +52,15 @@ public class RateLimitingFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+        /**
+         * Consumes one token per request. If the bucket is empty, a 429 error is returned.
+         *
+         * @param request  incoming HTTP request
+         * @param response HTTP response
+         * @param filterChain remaining filter chain
+         * @throws ServletException on servlet errors
+         * @throws IOException      on I/O errors
+         */
 
         String ip = request.getRemoteAddr();
         Bucket bucket = buckets.computeIfAbsent(ip, this::newBucket);

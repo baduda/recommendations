@@ -16,10 +16,23 @@ import java.util.stream.Stream;
 
 @Configuration
 @EnableCaching
+/**
+ * Infrastructure configuration providing beans for symbol validation and caching.
+ * <p>
+ * The {@code symbolValidator} bean auto-discovers supported symbols from the ETL directory
+ * to ensure the API accepts only those with available data. Falls back to a sensible set in tests.
+ */
 public class CryptoConfig {
 
     @Bean
     public SymbolValidator symbolValidator(@Value("${app.etl.directory}") String etlDirectory) throws IOException {
+        /**
+         * Builds a {@link SymbolValidator} by scanning available CSV files.
+         *
+         * @param etlDirectory directory with *_values.csv files
+         * @return validator backed by discovered symbols
+         * @throws IOException when the directory cannot be accessed
+         */
         Path rootPath = Path.of(etlDirectory);
         if (!Files.exists(rootPath) || !Files.isDirectory(rootPath)) {
             // Fallback for tests or if directory is missing

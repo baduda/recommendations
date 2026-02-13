@@ -24,6 +24,12 @@ import java.util.List;
 @RequestMapping("/api/v1/crypto")
 @Tag(name = "Crypto Stats API", description = "Endpoints for cryptocurrency analytics")
 @Validated
+/**
+ * REST controller exposing read-only analytics endpoints.
+ * <p>
+ * The controller delegates to the application service and returns DTOs. It validates input format
+ * (e.g., ticker pattern, ISO date) at the edge to fail fast and produce RFC 7807 errors.
+ */
 public class CryptoController {
 
     private final CryptoApplicationService cryptoService;
@@ -48,6 +54,12 @@ public class CryptoController {
     public ResponseEntity<CryptoStatsDto> getStats(
             @Parameter(description = "Coin ticker (e.g., BTC)", example = "BTC")
             @PathVariable @Pattern(regexp = "^[A-Z]{3,10}$", message = "Symbol must be 3-10 uppercase letters") String symbol) {
+        /**
+         * Retrieves summary stats for the given symbol.
+         *
+         * @param symbol coin ticker, validated by regex
+         * @return 200 with {@link CryptoStatsDto} or an RFC 7807 error otherwise
+         */
         return ResponseEntity.ok(cryptoMapper.toDto(cryptoService.getStats(symbol)));
     }
 
@@ -63,6 +75,11 @@ public class CryptoController {
     )
     @GetMapping("/sorted")
     public List<CryptoRangeDto> getSortedRange() {
+        /**
+         * Lists all coins sorted by descending normalized range.
+         *
+         * @return array of {@link CryptoRangeDto}
+         */
         return cryptoService.getAllSortedStats().stream()
                 .map(cryptoMapper::toRangeDto)
                 .toList();
@@ -82,6 +99,12 @@ public class CryptoController {
     public ResponseEntity<CryptoRangeDto> getHighestRange(
             @Parameter(description = "Date in yyyy-MM-dd format", example = "2022-01-01")
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        /**
+         * Returns the coin with the highest normalized range for a specific date.
+         *
+         * @param date target date in UTC
+         * @return 200 with single {@link CryptoRangeDto} or 404 when no data exists
+         */
         return cryptoService.getHighestRangeForDate(date)
                 .map(cryptoMapper::toRangeDto)
                 .map(ResponseEntity::ok)

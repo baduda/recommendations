@@ -3,6 +3,10 @@ package com.epam.xm.recommendations.application.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.math.BigDecimal;
 
+/**
+ * API DTO carrying full statistics for a cryptocurrency over the loaded period.
+ * Mirrors {@link com.epam.xm.recommendations.domain.CryptoStats} without additional logic.
+ */
 @Schema(description = "Cryptocurrency statistics for the entire period")
 public record CryptoStatsDto(
     @Schema(description = "Coin ticker", example = "BTC")

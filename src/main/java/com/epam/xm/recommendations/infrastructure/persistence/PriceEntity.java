@@ -18,6 +18,12 @@ import java.time.OffsetDateTime;
         @UniqueConstraint(name = "uq_crypto_prices_symbol_timestamp", columnNames = {"symbol", "price_timestamp"})
     }
 )
+/**
+ * JPA entity representing a single quote.
+ * <p>
+ * The composite index on (symbol, price_timestamp DESC) accelerates newest/oldest fetches and
+ * range scans. A unique constraint prevents duplicate ingestions for the same (symbol, timestamp).
+ */
 public class PriceEntity {
 
     @Id

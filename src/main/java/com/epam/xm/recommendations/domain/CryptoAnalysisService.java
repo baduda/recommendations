@@ -8,8 +8,32 @@ import java.util.Comparator;
 import java.util.List;
 
 @Service
+/**
+ * Performs core domain analytics on crypto price time series.
+ * <p>
+ * The service intentionally performs all arithmetic using {@link java.math.BigDecimal}
+ * to avoid precision loss inherent to binary floating-point types. Market data often
+ * mixes very large and very small magnitudes; rounding errors would compound when
+ * computing ratios (e.g., normalized range), potentially changing ordering and
+ * downstream decisions. By fixing scale and using {@link java.math.RoundingMode#HALF_UP}
+ * the results are stable and auditable.
+ */
 public class CryptoAnalysisService {
 
+    /**
+     * Calculates summary statistics for a symbol over the provided points.
+     * <p>
+     * The normalized range is defined as (max - min) / min and serves as a unit-less
+     * volatility proxy that allows comparing coins with different absolute prices.
+     * Division is performed with scale 4 and {@link java.math.RoundingMode#HALF_UP}
+     * to provide a compact representation for UI sorting while preserving ordering
+     * consistency.
+     *
+     * @param symbol      the coin ticker all points must belong to
+     * @param pricePoints time-ordered or unordered list of price points; must not be empty
+     * @return computed {@link CryptoStats} including oldest, newest, min, max and normalized range
+     * @throws IllegalArgumentException if list is empty or contains points of another symbol
+     */
     public CryptoStats calculateStats(String symbol, List<PricePoint> pricePoints) {
         if (pricePoints.isEmpty()) {
             throw new IllegalArgumentException("Price points list cannot be empty");

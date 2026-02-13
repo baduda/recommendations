@@ -13,8 +13,18 @@ import javax.sql.DataSource;
 @Configuration
 @EnableScheduling
 @EnableSchedulerLock(defaultLockAtMostFor = "10m")
+/**
+ * Scheduling configuration enabling ShedLock to avoid concurrent ETL runs
+ * across multiple application instances.
+ */
 public class SchedulerConfig {
 
+    /**
+     * Provides a lock provider backed by JDBC using database time to prevent clock skew issues.
+     *
+     * @param dataSource application data source
+     * @return ShedLock {@link LockProvider}
+     */
     @Bean
     public LockProvider lockProvider(DataSource dataSource) {
         return new JdbcTemplateLockProvider(
