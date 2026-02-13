@@ -1,12 +1,11 @@
 package com.epam.xm.recommendations.interfaces.rest;
 
+import com.epam.xm.recommendations.BaseIntegrationTest;
 import com.epam.xm.recommendations.infrastructure.persistence.PriceEntity;
 import com.epam.xm.recommendations.infrastructure.persistence.PriceRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -16,21 +15,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@org.springframework.test.context.ActiveProfiles("test")
-public class CryptoApiIntTest {
-
-    @Autowired
-    private org.springframework.web.context.WebApplicationContext context;
-
-    private MockMvc mockMvc;
+public class CryptoApiIntTest extends BaseIntegrationTest {
 
     @Autowired
     private PriceRepository priceRepository;
 
     @BeforeEach
     void setup() {
-        this.mockMvc = org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup(context).build();
         priceRepository.deleteAll();
         
         priceRepository.save(new PriceEntity("BTC", new BigDecimal("40000"), 

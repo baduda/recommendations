@@ -24,10 +24,29 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.springframework.transaction.annotation.Transactional;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @ActiveProfiles("test")
 @EnableCaching
+@Transactional
 class CachingTest {
+
+    static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:17-alpine");
+
+    static {
+        postgres.start();
+    }
+
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", postgres::getJdbcUrl);
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
+    }
 
     @MockitoBean
     private RateLimitingFilter rateLimitingFilter;
@@ -70,8 +89,9 @@ class CachingTest {
         when(analysisService.calculateStats(eq(symbol), any())).thenReturn(stats);
 
         // Clear cache before test if it exists
-        if (cacheManager.getCache("crypto-stats") != null) {
-            cacheManager.getCache("crypto-stats").clear();
+        var cache = cacheManager.getCache("crypto-stats");
+        if (cache != null) {
+            cache.clear();
         }
 
         // First call - should call repository and service
@@ -81,6 +101,6 @@ class CachingTest {
         cryptoApplicationService.getStats(symbol);
 
         verify(analysisService, times(1)).calculateStats(eq(symbol), any());
-        assertNotNull(cacheManager.getCache("crypto-stats").get(symbol));
+        assertNotNull(cache.get(symbol));
     }
 }

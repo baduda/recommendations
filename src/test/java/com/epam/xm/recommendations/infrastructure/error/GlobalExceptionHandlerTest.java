@@ -54,6 +54,7 @@ class GlobalExceptionHandlerTest {
     @Test
     void handleRateLimit() {
         RateLimitExceededException ex = new RateLimitExceededException("Limit");
+        RateLimitExceededException exWithCause = new RateLimitExceededException("Limit", new RuntimeException());
         ApiError error = handler.handleRateLimit(ex, request);
         assertEquals(HttpStatus.TOO_MANY_REQUESTS.value(), error.status());
         assertEquals("Limit", error.message());

@@ -11,7 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-public class RateLimitingTest {
+public class RateLimitingTest extends com.epam.xm.recommendations.BaseIntegrationTest {
 
     @Autowired
     private org.springframework.web.context.WebApplicationContext context;
