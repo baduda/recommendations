@@ -42,6 +42,12 @@ class DomainLogicTest {
     }
 
     @Test
+    void testZeroPriceThrowsException() {
+        assertThatThrownBy(() -> new PricePoint(Instant.now(), "BTC", BigDecimal.ZERO))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
     void testNegativePriceThrowsException() {
         assertThatThrownBy(() -> new PricePoint(Instant.now(), "BTC", new BigDecimal("-100")))
                 .isInstanceOf(IllegalArgumentException.class);

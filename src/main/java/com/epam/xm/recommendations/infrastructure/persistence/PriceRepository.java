@@ -44,5 +44,7 @@ public interface PriceRepository extends JpaRepository<PriceEntity, Long> {
 
     List<PriceEntity> findAllBySymbol(String symbol);
 
+    List<PriceEntity> findAllByPriceTimestampBetween(OffsetDateTime start, OffsetDateTime end);
+
     List<PriceEntity> findAllBySymbolAndPriceTimestampBetween(String symbol, OffsetDateTime start, OffsetDateTime end);
 }

@@ -8,8 +8,8 @@ public record PricePoint(Instant timestamp, String symbol, BigDecimal price) {
         if (symbol.isBlank()) {
             throw new IllegalArgumentException("Symbol cannot be empty");
         }
-        if (price.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Price cannot be negative");
+        if (price.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Price must be positive");
         }
     }
 }

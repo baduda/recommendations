@@ -15,7 +15,9 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -45,12 +47,12 @@ public class CryptoApplicationService {
 
     @Cacheable("crypto-ranges")
     public List<CryptoStats> getAllSortedStats() {
-        List<String> symbols = priceRepository.findAllSymbols();
-        return symbols.stream()
-                .map(s -> {
-                    List<PriceEntity> entities = priceRepository.findAllBySymbol(s);
-                    return analysisService.calculateStats(s, mapToPricePoints(entities));
-                })
+        List<PriceEntity> allEntities = priceRepository.findAll();
+        Map<String, List<PriceEntity>> grouped = allEntities.stream()
+                .collect(Collectors.groupingBy(PriceEntity::getSymbol));
+
+        return grouped.entrySet().stream()
+                .map(entry -> analysisService.calculateStats(entry.getKey(), mapToPricePoints(entry.getValue())))
                 .sorted(Comparator.comparing(CryptoStats::normalizedRange).reversed())
                 .toList();
     }
@@ -59,16 +61,12 @@ public class CryptoApplicationService {
         OffsetDateTime start = date.atStartOfDay().atOffset(ZoneOffset.UTC);
         OffsetDateTime end = date.atTime(LocalTime.MAX).atOffset(ZoneOffset.UTC);
 
-        List<String> symbols = priceRepository.findAllSymbols();
-        return symbols.stream()
-                .map(s -> {
-                    List<PriceEntity> entities = priceRepository.findAllBySymbolAndPriceTimestampBetween(s, start, end);
-                    if (entities.isEmpty()) {
-                        return null;
-                    }
-                    return analysisService.calculateStats(s, mapToPricePoints(entities));
-                })
-                .filter(java.util.Objects::nonNull)
+        List<PriceEntity> allEntities = priceRepository.findAllByPriceTimestampBetween(start, end);
+        Map<String, List<PriceEntity>> grouped = allEntities.stream()
+                .collect(Collectors.groupingBy(PriceEntity::getSymbol));
+
+        return grouped.entrySet().stream()
+                .map(entry -> analysisService.calculateStats(entry.getKey(), mapToPricePoints(entry.getValue())))
                 .max(Comparator.comparing(CryptoStats::normalizedRange));
     }
 
