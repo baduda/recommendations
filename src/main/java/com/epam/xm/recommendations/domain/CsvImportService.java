@@ -1,12 +1,13 @@
 package com.epam.xm.recommendations.domain;
 
+import com.epam.xm.recommendations.infrastructure.config.AppImportProperties;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import jakarta.annotation.PostConstruct;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
+import java.util.stream.Stream;
 
 @Service
 /**
@@ -40,20 +42,38 @@ public class CsvImportService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CsvImportService.class);
 
     private final JdbcTemplate jdbcTemplate;
-    private final String etlDirectory;
+    private final AppImportProperties importProperties;
     private final int batchSize;
     private final CsvMapper csvMapper;
     private final CsvSchema csvSchema;
 
     public CsvImportService(
             JdbcTemplate jdbcTemplate,
-            @Value("${app.etl.directory}") String etlDirectory,
-            @Value("${app.etl.batch-size:1000}") int batchSize) {
+            AppImportProperties importProperties,
+            @org.springframework.beans.factory.annotation.Value("${app.etl.batch-size:1000}") int batchSize) {
         this.jdbcTemplate = jdbcTemplate;
-        this.etlDirectory = etlDirectory;
+        this.importProperties = importProperties;
         this.batchSize = batchSize;
         this.csvMapper = new CsvMapper();
         this.csvSchema = CsvSchema.emptySchema().withHeader();
+    }
+
+    @PostConstruct
+    public void validateDirectory() {
+        Path rootPath = Path.of(importProperties.directory());
+        if (!Files.exists(rootPath)) {
+            LOGGER.error("Import directory does not exist: {}", importProperties.directory());
+            throw new IllegalStateException("Import directory does not exist: " + importProperties.directory());
+        }
+        if (!Files.isDirectory(rootPath)) {
+            LOGGER.error("Import path is not a directory: {}", importProperties.directory());
+            throw new IllegalStateException("Import path is not a directory: " + importProperties.directory());
+        }
+        if (!Files.isReadable(rootPath)) {
+            LOGGER.error("Import directory is not readable: {}", importProperties.directory());
+            throw new IllegalStateException("Import directory is not readable: " + importProperties.directory());
+        }
+        LOGGER.info("Import directory validated: {}", importProperties.directory());
     }
 
     @Scheduled(cron = "${app.etl.cron}")
@@ -67,28 +87,32 @@ public class CsvImportService {
          *
          * Cache entries are evicted to ensure queries reflect new data.
          */
-        LOGGER.info("Starting CSV import from directory: {}", etlDirectory);
-        var rootPath = Path.of(etlDirectory);
+        LOGGER.info("Starting CSV import from directory: {}", importProperties.directory());
+        var rootPath = Path.of(importProperties.directory());
 
         if (!Files.exists(rootPath) || !Files.isDirectory(rootPath)) {
-            LOGGER.error("ETL directory does not exist or is not a directory: {}", etlDirectory);
+            LOGGER.error("ETL directory does not exist or is not a directory: {}", importProperties.directory());
             return;
         }
 
-        try (var paths = Files.list(rootPath);
-             var executor = Executors.newVirtualThreadPerTaskExecutor()) {
-            
-            paths.filter(path -> path.toString().endsWith(".csv"))
-                 .forEach(path -> executor.submit(() -> {
-                     try {
-                         processFile(path);
-                     } catch (RuntimeException e) {
-                         LOGGER.error("Error processing file {}: {}", path.getFileName(), e.getMessage(), e);
-                     }
-                 }));
-            
+        try (Stream<Path> pathsList = Files.list(rootPath)) {
+            List<Path> files = pathsList.filter(path -> path.toString().endsWith(".csv")).toList();
+            if (files.isEmpty()) {
+                LOGGER.warn("Import directory is empty or contains no CSV files: {}", importProperties.directory());
+                return;
+            }
+
+            try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+                files.forEach(path -> executor.submit(() -> {
+                    try {
+                        processFile(path);
+                    } catch (RuntimeException e) {
+                        LOGGER.error("Error processing file {}: {}", path.getFileName(), e.getMessage(), e);
+                    }
+                }));
+            }
         } catch (IOException e) {
-            LOGGER.error("Error listing files in directory: {}", etlDirectory, e);
+            LOGGER.error("Error listing files in directory: {}", importProperties.directory(), e);
         }
         LOGGER.info("CSV import task submitted to virtual threads.");
     }

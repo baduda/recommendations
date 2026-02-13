@@ -1,5 +1,6 @@
 package com.epam.xm.recommendations.domain;
 
+import com.epam.xm.recommendations.infrastructure.config.AppImportProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -25,7 +26,8 @@ class CsvImportServiceTest {
     @BeforeEach
     void setUp() {
         jdbcTemplate = mock(JdbcTemplate.class);
-        csvImportService = new CsvImportService(jdbcTemplate, tempDir.toString(), 100);
+        AppImportProperties props = new AppImportProperties(tempDir.toString());
+        csvImportService = new CsvImportService(jdbcTemplate, props, 100);
     }
 
     @Test
@@ -46,7 +48,8 @@ class CsvImportServiceTest {
 
     @Test
     void shouldHandleMissingDirectory() {
-        csvImportService = new CsvImportService(jdbcTemplate, "/non-existent-path", 100);
+        AppImportProperties props = new AppImportProperties("/non-existent-path");
+        csvImportService = new CsvImportService(jdbcTemplate, props, 100);
         csvImportService.importCsvFiles();
         verifyNoInteractions(jdbcTemplate);
     }
@@ -55,7 +58,8 @@ class CsvImportServiceTest {
     void shouldHandleNotDirectory() throws IOException {
         Path file = tempDir.resolve("not-a-dir.txt");
         Files.createFile(file);
-        csvImportService = new CsvImportService(jdbcTemplate, file.toString(), 100);
+        AppImportProperties props = new AppImportProperties(file.toString());
+        csvImportService = new CsvImportService(jdbcTemplate, props, 100);
         csvImportService.importCsvFiles();
         verifyNoInteractions(jdbcTemplate);
     }

@@ -2,7 +2,6 @@ package com.epam.xm.recommendations.infrastructure.config;
 
 import com.epam.xm.recommendations.domain.SetBasedSymbolValidator;
 import com.epam.xm.recommendations.domain.SymbolValidator;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,15 +24,15 @@ import java.util.stream.Stream;
 public class CryptoConfig {
 
     @Bean
-    public SymbolValidator symbolValidator(@Value("${app.etl.directory}") String etlDirectory) throws IOException {
+    public SymbolValidator symbolValidator(AppImportProperties importProperties) throws IOException {
         /**
          * Builds a {@link SymbolValidator} by scanning available CSV files.
          *
-         * @param etlDirectory directory with *_values.csv files
+         * @param importProperties import configuration
          * @return validator backed by discovered symbols
          * @throws IOException when the directory cannot be accessed
          */
-        Path rootPath = Path.of(etlDirectory);
+        Path rootPath = Path.of(importProperties.directory());
         if (!Files.exists(rootPath) || !Files.isDirectory(rootPath)) {
             // Fallback for tests or if directory is missing
             return new SetBasedSymbolValidator(Set.of("BTC", "ETH", "LTC", "XRP", "DOGE"));

@@ -8,6 +8,9 @@ services:
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - APP_IMPORT_DIRECTORY=/app/data/prices
+    volumes:
+      - ./prices:/app/data/prices:ro
     depends_on:
       postgres:
         condition: service_healthy

@@ -43,9 +43,11 @@ app:
   rate-limit:
     capacity: 10
     tokens-per-minute: 10
+  import:
+    directory: ${APP_IMPORT_DIRECTORY:/app/data/prices}
   etl:
     cron: "${ETL_CRON:0 0 0 * * *}"
-    directory: "${ETL_DIRECTORY:src/main/resources/prices}"
+    directory: ${app.import.directory}
     batch-size: 1000
 
 management:
