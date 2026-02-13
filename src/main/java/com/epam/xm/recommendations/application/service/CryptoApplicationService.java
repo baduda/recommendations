@@ -5,6 +5,7 @@ import com.epam.xm.recommendations.infrastructure.error.CryptoNotFoundException;
 import com.epam.xm.recommendations.infrastructure.error.UnsupportedCryptoException;
 import com.epam.xm.recommendations.infrastructure.persistence.PriceEntity;
 import com.epam.xm.recommendations.infrastructure.persistence.PriceRepository;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +33,7 @@ public class CryptoApplicationService {
         this.symbolValidator = symbolValidator;
     }
 
+    @Cacheable(value = "crypto-stats", key = "#symbol")
     public CryptoStats getStats(String symbol) {
         validateSymbol(symbol);
         List<PriceEntity> entities = priceRepository.findAllBySymbol(symbol);
@@ -41,6 +43,7 @@ public class CryptoApplicationService {
         return analysisService.calculateStats(symbol, mapToPricePoints(entities));
     }
 
+    @Cacheable(value = "crypto-ranges")
     public List<CryptoStats> getAllSortedStats() {
         List<String> symbols = priceRepository.findAllSymbols();
         return symbols.stream()

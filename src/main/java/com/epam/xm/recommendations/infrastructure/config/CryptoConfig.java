@@ -3,6 +3,7 @@ package com.epam.xm.recommendations.infrastructure.config;
 import com.epam.xm.recommendations.domain.SetBasedSymbolValidator;
 import com.epam.xm.recommendations.domain.SymbolValidator;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Configuration
+@EnableCaching
 public class CryptoConfig {
 
     @Bean

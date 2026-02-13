@@ -7,6 +7,7 @@ import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -49,6 +50,7 @@ public class CsvImportService {
 
     @Scheduled(cron = "${app.etl.cron}")
     @SchedulerLock(name = "csvImportLock", lockAtLeastFor = "10s", lockAtMostFor = "10m")
+    @CacheEvict(value = {"crypto-stats", "crypto-ranges"}, allEntries = true)
     public void importCsvFiles() {
         log.info("Starting CSV import from directory: {}", etlDirectory);
         var rootPath = Path.of(etlDirectory);

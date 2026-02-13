@@ -51,7 +51,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidDataException.class)
-    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_CONTENT)
     @ApiResponse(responseCode = "422", description = "Invalid data provided",
             content = @Content(schema = @Schema(implementation = ApiError.class)))
     public ApiError handleInvalidData(InvalidDataException ex, HttpServletRequest request) {
@@ -79,6 +79,21 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST.value(),
                 "VALIDATION_FAILED",
                 message,
+                request.getRequestURI()
+        );
+    }
+
+    @ExceptionHandler(RateLimitExceededException.class)
+    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
+    @ApiResponse(responseCode = "429", description = "Too Many Requests",
+            content = @Content(schema = @Schema(implementation = ApiError.class)))
+    public ApiError handleRateLimit(RateLimitExceededException ex, HttpServletRequest request) {
+        log.warn("Rate limit exceeded for path: {}", request.getRequestURI());
+        return new ApiError(
+                Instant.now(),
+                HttpStatus.TOO_MANY_REQUESTS.value(),
+                "TOO_MANY_REQUESTS",
+                ex.getMessage(),
                 request.getRequestURI()
         );
     }
