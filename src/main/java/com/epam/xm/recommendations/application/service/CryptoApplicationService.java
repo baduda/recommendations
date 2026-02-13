@@ -12,7 +12,6 @@ import java.time.ZoneOffset;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -93,9 +92,11 @@ public class CryptoApplicationService {
      * Finds the coin with the highest normalized range for a given day (UTC).
      *
      * @param date target day in UTC
-     * @return optional stats for the most volatile coin on that day
+     * @return stats for the most volatile coin on that day
+     * @throws com.epam.xm.recommendations.infrastructure.error.CryptoNotFoundException when no data
+     *     exists for the specified date
      */
-    public Optional<CryptoStats> getHighestRangeForDate(LocalDate date) {
+    public CryptoStats getHighestRangeForDate(LocalDate date) {
         OffsetDateTime start = date.atStartOfDay().atOffset(ZoneOffset.UTC);
         OffsetDateTime end = date.atTime(LocalTime.MAX).atOffset(ZoneOffset.UTC);
 
@@ -108,7 +109,11 @@ public class CryptoApplicationService {
                         entry ->
                                 analysisService.calculateStats(
                                         entry.getKey(), mapToPricePoints(entry.getValue())))
-                .max(Comparator.comparing(CryptoStats::normalizedRange));
+                .max(Comparator.comparing(CryptoStats::normalizedRange))
+                .orElseThrow(
+                        () ->
+                                new CryptoNotFoundException(
+                                        "No crypto data found for date: " + date));
     }
 
     /**

@@ -133,10 +133,7 @@ public class CryptoController {
          * @param date target date in UTC
          * @return 200 with single {@link CryptoRangeDto} or 404 when no data exists
          */
-        return cryptoService
-                .getHighestRangeForDate(date)
-                .map(cryptoMapper::toRangeDto)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(
+                cryptoMapper.toRangeDto(cryptoService.getHighestRangeForDate(date)));
     }
 }

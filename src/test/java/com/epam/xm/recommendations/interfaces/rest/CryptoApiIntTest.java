@@ -75,4 +75,11 @@ public class CryptoApiIntTest extends BaseIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.symbol").value("BTC"));
     }
+
+    @Test
+    void shouldReturn404WhenNoDataForDate() throws Exception {
+        mockMvc.perform(get("/api/v1/crypto/highest-range").param("date", "2025-01-01"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").exists());
+    }
 }

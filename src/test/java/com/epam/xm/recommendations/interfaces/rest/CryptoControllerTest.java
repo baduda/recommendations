@@ -14,7 +14,6 @@ import com.epam.xm.recommendations.infrastructure.error.UnsupportedCryptoExcepti
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -101,8 +100,7 @@ public class CryptoControllerTest {
                         new BigDecimal("45000"),
                         new BigDecimal("0.5"));
 
-        given(cryptoService.getHighestRangeForDate(any(LocalDate.class)))
-                .willReturn(Optional.of(stats));
+        given(cryptoService.getHighestRangeForDate(any(LocalDate.class))).willReturn(stats);
         // Use any() for DTO mapping if cryptoMapper is a MockitoBean
         given(cryptoMapper.toRangeDto(any()))
                 .willReturn(
