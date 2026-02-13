@@ -43,6 +43,7 @@ app:
   rate-limit:
     capacity: 10
     tokens-per-minute: 10
+    bucket-expiration-minutes: 60
   import:
     directory: ${APP_IMPORT_DIRECTORY:/app/data/prices}
   etl:

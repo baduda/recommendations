@@ -1,6 +1,8 @@
 package com.epam.xm.recommendations.infrastructure.config;
 
 import com.epam.xm.recommendations.infrastructure.error.RateLimitExceededException;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import jakarta.servlet.FilterChain;
@@ -9,8 +11,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.time.Duration;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RateLimitingFilter.class);
 
-    private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
+    private final Cache<String, Bucket> buckets;
     private final HandlerExceptionResolver handlerExceptionResolver;
     private final int capacity;
     private final int tokensPerMinute;
@@ -42,11 +42,21 @@ public class RateLimitingFilter extends OncePerRequestFilter {
             @Qualifier("handlerExceptionResolver")
                     HandlerExceptionResolver handlerExceptionResolver,
             @Value("${app.rate-limit.capacity:10}") int capacity,
-            @Value("${app.rate-limit.tokens-per-minute:10}") int tokensPerMinute) {
+            @Value("${app.rate-limit.tokens-per-minute:10}") int tokensPerMinute,
+            @Value("${app.rate-limit.bucket-expiration-minutes:60}") long bucketExpirationMinutes) {
         super();
         this.handlerExceptionResolver = handlerExceptionResolver;
         this.capacity = capacity;
         this.tokensPerMinute = tokensPerMinute;
+        this.buckets =
+                Caffeine.newBuilder()
+                        .expireAfterAccess(Duration.ofMinutes(bucketExpirationMinutes))
+                        .build();
+    }
+
+    public RateLimitingFilter(
+            HandlerExceptionResolver handlerExceptionResolver, int capacity, int tokensPerMinute) {
+        this(handlerExceptionResolver, capacity, tokensPerMinute, 60);
     }
 
     @Override
@@ -63,7 +73,7 @@ public class RateLimitingFilter extends OncePerRequestFilter {
          * @throws IOException on I/O errors
          */
         String ip = request.getRemoteAddr();
-        Bucket bucket = buckets.computeIfAbsent(ip, this::newBucket);
+        Bucket bucket = buckets.get(ip, this::newBucket);
 
         if (bucket.tryConsume(1)) {
             filterChain.doFilter(request, response);
