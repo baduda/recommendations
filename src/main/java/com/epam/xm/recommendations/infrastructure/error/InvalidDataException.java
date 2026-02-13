@@ -9,4 +9,8 @@ public class InvalidDataException extends BaseCryptoException {
     public InvalidDataException(String message) {
         super(message);
     }
+
+    public InvalidDataException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

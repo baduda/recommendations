@@ -2,6 +2,7 @@ plugins {
     java
     id("org.springframework.boot") version "4.0.2"
     id("io.spring.dependency-management") version "1.1.7"
+    jacoco
 }
 
 group = "com.epam.xm"
@@ -57,4 +58,65 @@ tasks.withType<Test> {
     useJUnitPlatform()
     environment("DOCKER_HOST", "unix://${System.getProperty("user.home")}/.colima/default/docker.sock")
     environment("TESTCONTAINERS_RYUK_DISABLED", "true")
+    finalizedBy("jacocoTestReport")
+}
+
+val jacocoExcludes = listOf(
+    "**/dto/**",
+    "**/persistence/*Entity*",
+    "**/config/**",
+    "**/*Application*",
+    "**/infrastructure/error/ApiError*",
+    "**/domain/PricePoint*",
+    "**/domain/CryptoStats*"
+)
+
+tasks.withType<JacocoReport> {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+    classDirectories.setFrom(
+        sourceSets.main.get().output.asFileTree.matching {
+            exclude(jacocoExcludes)
+        }
+    )
+}
+
+tasks.withType<JacocoCoverageVerification> {
+    dependsOn("jacocoTestReport")
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.80".toBigDecimal()
+            }
+        }
+        rule {
+            element = "CLASS"
+            limit {
+                counter = "BRANCH"
+                value = "COVEREDRATIO"
+                minimum = "0.80".toBigDecimal()
+            }
+            limit {
+                counter = "INSTRUCTION"
+                value = "COVEREDRATIO"
+                minimum = "0.80".toBigDecimal()
+            }
+            excludes = listOf(
+                "*.dto.*",
+                "*.persistence.*Entity*",
+                "*.config.*",
+                "*Application*",
+                "*.infrastructure.error.ApiError*",
+                "*.domain.PricePoint*",
+                "*.domain.CryptoStats*"
+            )
+        }
+    }
+}
+
+tasks.check {
+    dependsOn("jacocoTestCoverageVerification")
 }

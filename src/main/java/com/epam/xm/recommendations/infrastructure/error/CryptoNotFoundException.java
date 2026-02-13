@@ -9,4 +9,8 @@ public class CryptoNotFoundException extends BaseCryptoException {
     public CryptoNotFoundException(String message) {
         super(message);
     }
+
+    public CryptoNotFoundException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

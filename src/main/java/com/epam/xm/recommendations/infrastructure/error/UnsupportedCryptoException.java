@@ -9,4 +9,8 @@ public class UnsupportedCryptoException extends BaseCryptoException {
     public UnsupportedCryptoException(String message) {
         super(message);
     }
+
+    public UnsupportedCryptoException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
